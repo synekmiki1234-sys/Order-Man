@@ -1,0 +1,8 @@
+{
+  "name":"order-man-app",
+  "version":"2.1.0",
+  "private":true,
+  "description":"Order-Man - aplikacja do zamówień klasowych bez zewnętrznych zależności",
+  "main":"server.js",
+  "scripts":{"start":"node server.js","dev":"node server.js"}
+}
