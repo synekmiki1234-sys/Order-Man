@@ -1,1 +1,121 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#ffe600">
+<title>Order-Man</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
 
+<section id="auth" class="auth-screen">
+  <div class="auth-card">
+    <div class="brand center">
+      <div class="hero-logo logo-large"><span class="cape">●</span><span class="pizza">🍕</span></div>
+      <div><div class="brand-name">ORDER-MAN</div><div class="brand-sub">zamówienia klasowe</div></div>
+    </div>
+    <div class="tabs"><button type="button" class="tab active" data-auth="login">ZALOGUJ</button><button type="button" class="tab" data-auth="register">REJESTRUJ</button></div>
+
+    <form id="loginForm" class="form" novalidate>
+      <label>Login lub identyfikator<input name="login" autocomplete="username" placeholder="login lub OM-XXXXXXXXXXXX" required></label>
+      <label>Hasło<input name="password" type="password" autocomplete="current-password" required></label>
+      <label class="check"><input name="rememberMe" type="checkbox"> Zapamiętaj mnie</label>
+      <button class="primary big" type="submit">ZALOGUJ SIĘ</button>
+    </form>
+
+    <form id="registerForm" class="form hidden" novalidate>
+      <div class="grid2"><label>Imię<input name="firstName" autocomplete="given-name" required></label><label>Nazwisko<input name="lastName" autocomplete="family-name" required></label></div>
+      <label>Nazwa użytkownika<input name="username" autocomplete="username" pattern="[A-Za-z0-9._-]{3,40}" required></label>
+      <label>Hasło<input name="password" type="password" autocomplete="new-password" minlength="6" required></label>
+      <label>Typ konta<select name="role"><option value="teacher">Nauczyciel</option><option value="receiver">Odbieracz</option></select></label>
+      <label class="check"><input name="rememberMe" type="checkbox"> Zapamiętaj mnie</label>
+      <button class="primary big" type="submit">UTWÓRZ KONTO</button>
+    </form>
+    <p class="muted">Nie potrzebujesz adresu e-mail.</p>
+    <div id="authError" class="error"></div>
+  </div>
+</section>
+
+<section id="app" class="app hidden">
+  <header class="topbar">
+    <div class="brand"><div class="logo small"><span class="cape">●</span><span class="pizza">🍕</span></div><div class="brand-name">ORDER-MAN</div></div>
+    <div class="top-actions">
+      <button id="bellBtn" class="icon-btn" aria-label="Powiadomienia">🔔<span id="bellDot" class="dot hidden"></span></button>
+      <button id="profileBtn" class="avatar" aria-label="Profil">●</button>
+    </div>
+  </header>
+
+  <main class="page">
+    <section class="dashboard">
+      <div class="hero">
+        <div><span class="eyebrow" id="welcomeRole">PANEL</span><h1 id="welcome">Witaj!</h1><p id="heroText"></p></div>
+        <div class="hero-logo"><span class="cape">●</span><span class="pizza">🍕</span></div>
+      </div>
+
+      <div id="teacherHome" class="role-home">
+        <button id="createListBtn" class="create-card"><span class="plus">+</span><span><b>STWÓRZ LISTĘ</b><small>wybierz klasę, odbieracza i uczniów</small></span></button>
+        <h2>TWOJE LISTY</h2>
+        <div id="sentOrders" class="orders"></div>
+      </div>
+
+      <div id="receiverHome" class="role-home hidden">
+        <div class="receiver-banner"><span>🔔</span><div><b>NOWE ZAMÓWIENIA</b><small>Czerwona kropka przy dzwonku oznacza nowe zamówienie.</small></div></div>
+        <h2>ODEBRANE OSTATNIO</h2>
+        <div id="receivedInfo" class="orders"></div>
+      </div>
+    </section>
+  </main>
+
+  <div id="profileMenu" class="popover hidden">
+    <div class="profile-name" id="profileName"></div><div class="profile-id" id="profileId"></div>
+    <button id="settingsBtn" type="button">⚙ USTAWIENIA</button><button id="logoutBtn" class="danger-text" type="button">↪ WYLOGUJ</button>
+  </div>
+
+  <div id="bellPanel" class="side-panel hidden">
+    <div class="panel-head"><h2>POWIADOMIENIA</h2><button class="close" type="button" data-close="bellPanel">×</button></div>
+    <div id="inbox" class="inbox"></div>
+  </div>
+
+  <div id="settingsPanel" class="modal hidden">
+    <div class="modal-card settings-card">
+      <div class="modal-head"><h2>USTAWIENIA</h2><button class="close" type="button" data-close="settingsPanel">×</button></div>
+      <button id="accountBtn" class="setting-row" type="button">KONTO <span>›</span></button>
+      <div id="accountSection" class="account-section hidden">
+        <div class="account-id-box"><span>Wygenerowany identyfikator</span><b id="accountId"></b><small>Możesz użyć go zamiast nazwy użytkownika podczas logowania.</small></div>
+        <button id="deleteAccountBtn" class="danger" type="button">USUŃ KONTO</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="orderModal" class="modal hidden">
+    <div class="modal-card order-card">
+      <div class="modal-head"><h2 id="orderModalTitle">STWÓRZ LISTĘ</h2><button class="close" type="button" data-close="orderModal">×</button></div>
+      <div class="stepbar"><span class="active">1. KLASA</span><span>2. ODBIERACZ</span><span>3. UCZNIOWIE</span></div>
+      <form id="orderForm" class="form" novalidate>
+        <label>Klasa<select name="className" id="classSelect"><option>I</option><option>II</option><option>III</option><option>IV</option><option>V</option><option>VI</option><option>VII</option><option>VIII</option></select></label>
+        <label>Identyfikator odbieracza<input id="receiverSearch" autocomplete="off" placeholder="np. OM-1234ABCDEF" required></label>
+        <button type="button" id="findReceiver" class="secondary">ZNAJDŹ ODBIERACZA</button>
+        <div id="receiverResult"></div>
+        <div id="studentEditor" class="hidden">
+          <div class="section-title">UCZNIOWIE <button type="button" id="addStudent" class="mini-plus">+</button></div>
+          <div id="students"></div>
+          <div id="orderError" class="error"></div>
+          <button id="sendOrderBtn" type="submit" class="primary big">WYŚLIJ ZAMÓWIENIE</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="viewOrderModal" class="modal hidden">
+    <div class="modal-card">
+      <div class="modal-head"><h2 id="viewTitle">ZAMÓWIENIE</h2><button class="close" type="button" data-close="viewOrderModal">×</button></div>
+      <div id="viewBody"></div>
+      <button id="ackBtn" class="primary big" type="button">OK — PRZYJĘTE</button>
+    </div>
+  </div>
+</section>
+<script src="/app.js"></script>
+</body>
+</html>
