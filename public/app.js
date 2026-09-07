@@ -29,6 +29,7 @@ function open(id) { $('#' + id)?.classList.remove('hidden'); }
 function close(id) { $('#' + id)?.classList.add('hidden'); }
 function esc(value) { return String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function fmt(date) { return new Date(date).toLocaleString('pl-PL', { dateStyle: 'short', timeStyle: 'short' }); }
+function fmtDate(date) { return new Date(date).toLocaleDateString('pl-PL', { day: 'numeric', month: 'long', year: 'numeric' }); }
 function setButtonLoading(button, loading, text) {
   if (!button) return;
   if (loading) { button.dataset.oldText = button.textContent; button.disabled = true; button.textContent = text || 'CHWILA...'; }
@@ -111,10 +112,22 @@ function resetOrderForm() {
   $('#studentEditor').classList.add('hidden');
   $('#orderError').textContent = '';
   $('#students').innerHTML = '';
-  addStudent();
+  loadRosterInto($('#classSelect').value);
   $('#sendOrderBtn').disabled = false;
   $('#sendOrderBtn').textContent = 'WYŚLIJ ZAMÓWIENIE';
 }
+async function loadRosterInto(className) {
+  $('#students').innerHTML = '';
+  try {
+    const data = await api('/api/roster?className=' + encodeURIComponent(className));
+    if (data.names && data.names.length) data.names.forEach(name => addStudent({ name, eats: true }));
+    else addStudent();
+  } catch { addStudent(); }
+}
+$('#classSelect').addEventListener('change', () => {
+  if (editingOrderId) return; // przy edycji nie nadpisujemy już wysłanej listy
+  loadRosterInto($('#classSelect').value);
+});
 function addStudent(data = { name: '', eats: true }) {
   const row = document.createElement('div');
   row.className = 'student-row';
@@ -228,7 +241,7 @@ async function loadReceivedHistory() {
     const data = await api('/api/orders/received');
     const box = $('#receivedInfo');
     if (!data.orders.length) { box.innerHTML = '<div class="empty">Nie ma jeszcze odebranych zamówień.</div>'; return; }
-    box.innerHTML = data.orders.map(order => `<div class="order-item"><div class="order-meta"><b>Klasa ${esc(order.className)}</b><small>Od: ${esc(order.senderName)}</small><small>Złożono: ${fmt(order.createdAt)} · Przyjęto: ${fmt(order.receivedAt)}</small></div><div class="received-mark">✓ PRZYJĘTE</div></div>`).join('');
+    box.innerHTML = data.orders.map(order => `<div class="order-item"><div class="order-meta"><b>Klasa ${esc(order.className)}</b><small>Od: ${esc(order.senderName)}</small><small>Złożono: ${fmtDate(order.createdAt)} · Przyjęto: ${fmtDate(order.receivedAt)}</small></div><div class="received-mark">✓ PRZYJĘTE</div></div>`).join('');
   } catch (error) { $('#receivedInfo').innerHTML = `<div class="error">${esc(error.message)}</div>`; }
 }
 function viewOrder(id, orders) {
@@ -236,7 +249,7 @@ function viewOrder(id, orders) {
   if (!order) return;
   currentViewOrder = order;
   $('#viewTitle').textContent = `KLASA ${order.className}`;
-  $('#viewBody').innerHTML = `<div class="date-box">Od: <b>${esc(order.senderName)}</b><br>Złożono: ${fmt(order.createdAt)}</div>` + order.students.map(student => `<div class="student-view"><span>${esc(student.name)}</span><span class="status-eat ${student.eats ? 'yes' : 'no'}">${student.eats ? 'JE' : 'NIE JE'}</span></div>`).join('');
+  $('#viewBody').innerHTML = `<div class="date-box">Od: <b>${esc(order.senderName)}</b><br>Złożono: <b>${fmtDate(order.createdAt)}</b> (${new Date(order.createdAt).toLocaleTimeString('pl-PL',{hour:'2-digit',minute:'2-digit'})})</div>` + order.students.map(student => `<div class="student-view"><span>${esc(student.name)}</span><span class="status-eat ${student.eats ? 'yes' : 'no'}">${student.eats ? 'JE' : 'NIE JE'}</span></div>`).join('');
   open('viewOrderModal');
 }
 $('#ackBtn').addEventListener('click', async () => {
