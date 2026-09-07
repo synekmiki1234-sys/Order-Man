@@ -20,7 +20,7 @@
 
     <form id="loginForm" class="form" novalidate>
       <label>Login lub identyfikator<input name="login" autocomplete="username" placeholder="login lub OM-XXXXXXXXXXXX" required></label>
-      <label>Hasło<input name="password" type="password" autocomplete="current-password" required></label>
+      <label>Hasło<div class="password-field"><input name="password" type="password" autocomplete="current-password" required><button type="button" class="toggle-password" aria-label="Pokaż hasło">👁</button></div></label>
       <label class="check"><input name="rememberMe" type="checkbox"> Zapamiętaj mnie</label>
       <button class="primary big" type="submit">ZALOGUJ SIĘ</button>
     </form>
@@ -28,7 +28,7 @@
     <form id="registerForm" class="form hidden" novalidate>
       <div class="grid2"><label>Imię<input name="firstName" autocomplete="given-name" required></label><label>Nazwisko<input name="lastName" autocomplete="family-name" required></label></div>
       <label>Nazwa użytkownika<input name="username" autocomplete="username" pattern="[A-Za-z0-9._-]{3,40}" required></label>
-      <label>Hasło<input name="password" type="password" autocomplete="new-password" minlength="6" required></label>
+      <label>Hasło<div class="password-field"><input name="password" type="password" autocomplete="new-password" minlength="6" required><button type="button" class="toggle-password" aria-label="Pokaż hasło">👁</button></div></label>
       <label>Typ konta<select name="role"><option value="teacher">Nauczyciel</option><option value="receiver">Odbieracz</option></select></label>
       <label class="check"><input name="rememberMe" type="checkbox"> Zapamiętaj mnie</label>
       <button class="primary big" type="submit">UTWÓRZ KONTO</button>
